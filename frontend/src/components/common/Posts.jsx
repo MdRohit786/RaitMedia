@@ -39,7 +39,7 @@ const Post = ({ post }) => {
 						<Link to={`/profile/${postOwner.username}`} className='font-bold text-white'>
 							{postOwner.fullName}
 						</Link>
-						<span className='text-gray-700 flex gap-1 text-sm'>
+						<span className='text-gray-400 flex gap-1 text-sm'>
 							<Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link>
 							<span>·</span>
 							<span>{formattedDate}</span>
@@ -93,7 +93,7 @@ const Post = ({ post }) => {
 												<div className='flex flex-col'>
 													<div className='flex items-center gap-1'>
 														<span className='font-bold text-white'>{comment.user.fullName}</span>
-														<span className='text-gray-700 text-sm'>
+														<span className='text-gray-400 text-sm'>
 															@{comment.user.username}
 														</span>
 													</div>
