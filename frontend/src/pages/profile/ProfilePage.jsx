@@ -190,7 +190,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts />
+					<Posts feedType={feedType === "posts" ? "forYou" : "following"}/>
 				</div>
 			</div>
 		</>

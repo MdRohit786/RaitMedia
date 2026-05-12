@@ -5,7 +5,7 @@ import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
-import { useMutation,useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation,useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 // import { use } from "react";
 
@@ -25,7 +25,7 @@ const Sidebar = () => {
         if (!res.ok) throw new Error(data.error || "Something went wrong");
       } catch (error) {
       
-        throw new Error(error.message || "Failed to logout");
+        throw new Error(error.message || "Failed to logout",{ cause: error });
       }
     },
     onSuccess: () => {
@@ -37,7 +37,7 @@ const Sidebar = () => {
 		toast.error("Failed to logout");
 	}
   });
-  const {data:authUser}= useQuery({queryKey:["authUser"]});
+  const authUser = queryClient.getQueryData(["authUser"]);
 
   return (
     <div className="md:flex-[2_2_0] w-20 max-w-52">
