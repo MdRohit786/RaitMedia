@@ -12,7 +12,7 @@ import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
-const ProfilePage = () => {
+const ProfilePage = ({ authUser }) => {
 	const [coverImg, setCoverImg] = useState(null);
 	const [profileImg, setProfileImg] = useState(null);
 	const [feedType, setFeedType] = useState("posts");
@@ -190,7 +190,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts feedType={feedType === "posts" ? "forYou" : "following"}/>
+					<Posts feedType={feedType === "posts" ? "forYou" : "following"} authUser={authUser} />
 				</div>
 			</div>
 		</>

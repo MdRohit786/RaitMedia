@@ -15,20 +15,24 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 
 function App() {
-	const {data:authUser,isLoading}= useQuery({
-		queryKey:["authUser"],
+	const { data: authUser, isLoading } = useQuery({
+		queryKey: ["authUser"],
 		queryFn: async () => {
 			try {
 				const res = await fetch("/api/auth/getme");
 				const data = await res.json();
-				if(data.error) return null;
+
+				if (data.error) return null;
 				if (!res.ok) throw new Error(data.error || "Failed to fetch user");
-				console.log("authUser is here", data);
+
 				return data;
 			} catch (error) {
-				throw new Error(error.message || "Failed to fetch user");
+				throw new Error(error.message || "Failed to fetch user", {
+					cause: error,
+				});
 			}
-		}
+		},
+		retry: false,
 	});
 	if(isLoading){
 		return(
@@ -44,11 +48,11 @@ function App() {
 
 			{ authUser && <Sidebar/>}
 			<Routes>
-				<Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login' />} />
+				<Route path='/' element={authUser ? <HomePage authUser={authUser} /> : <Navigate to='/login' />} />
 				<Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />} />				
 				<Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to='/' />} />
 				<Route path='/notifications' element={authUser ? <NotificationsPage /> : <Navigate to='/login' />} />
-				<Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to='/login' />} />
+				<Route path='/profile/:username' element={authUser ? <ProfilePage authUser={authUser} /> : <Navigate to='/login' />} />
 			</Routes>
 			{authUser && <RightPanel/>}
 			<Toaster/>
