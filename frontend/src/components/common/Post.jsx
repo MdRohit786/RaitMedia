@@ -8,12 +8,20 @@ import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
+import { formatPostDate } from "../../utils/date/index.js";
 // import { application } from "express";
 // import { POSTS } from "../../utils/db/dummy";
 
 const Post = ({ post, authUser }) => {
   const [comment, setComment] = useState("");
   const queryClient = useQueryClient();
+
+  const postOwner = post.user;
+  const isLiked = post.likes.includes(authUser._id);
+
+  const isMyPost = authUser._id === post.user._id;
+
+  const formattedDate = formatPostDate(post.createdAt);
 
   //delete post
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -108,12 +116,7 @@ const Post = ({ post, authUser }) => {
   }) 
 
 
-  const postOwner = post.user;
-  const isLiked = post.likes.includes(authUser._id);
-
-  const isMyPost = authUser._id === post.user._id;
-
-  const formattedDate = "1h";
+  
 
  
 
