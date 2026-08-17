@@ -12,16 +12,20 @@ import { formatPostDate } from "../../utils/date/index.js";
 // import { application } from "express";
 // import { POSTS } from "../../utils/db/dummy";
 
-const Post = ({ post, authUser }) => {
+const Post = ({ post, authUser, feedType }) => {
   const [comment, setComment] = useState("");
   const queryClient = useQueryClient();
 
-  const postOwner = post.user;
-  const isLiked = post.likes.includes(authUser._id);
+  const postOwner = post?.user || {};
+  const currentUserId = authUser?._id;
+  const isLiked =
+    !!currentUserId &&
+    Array.isArray(post?.likes) &&
+    post.likes.some((id) => id?.toString() === currentUserId.toString());
 
-  const isMyPost = authUser._id === post.user._id;
+  const isMyPost = !!currentUserId && currentUserId === postOwner?._id;
 
-  const formattedDate = formatPostDate(post.createdAt);
+  const formattedDate = formatPostDate(post?.createdAt);
 
   //delete post
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -47,7 +51,7 @@ const Post = ({ post, authUser }) => {
     },
   });
 
-// like posts 
+  // like posts
   const { mutate: likePost, isPending: isLiking } = useMutation({
     mutationFn: async () => {
       try {
@@ -67,16 +71,22 @@ const Post = ({ post, authUser }) => {
       }
     },
     onSuccess: (updatedLikes) => {
-      //invalidate the query to refetch the data
-      //this is not best UX, because it will refatch all posts
-      // instead, update the cache directly for that post
-      // queryClient.invalidateQueries({ queryKey: ["posts"] });
+      const userStillLikesPost = updatedLikes.some(
+        (id) => id?.toString() === currentUserId?.toString(),
+      );
+
       queryClient.setQueriesData({ queryKey: ["posts"] }, (oldData) => {
         if (!Array.isArray(oldData)) return oldData;
 
-        return oldData.map((p) =>
+        const updatedPosts = oldData.map((p) =>
           p._id === post._id ? { ...p, likes: updatedLikes } : p,
         );
+
+        if (feedType === "likes" && !userStillLikesPost) {
+          return updatedPosts.filter((p) => p._id !== post._id);
+        }
+
+        return updatedPosts;
       });
     },
     onError: (error) => {
@@ -85,40 +95,37 @@ const Post = ({ post, authUser }) => {
   });
 
   // comment post
-  const{mutate: commentPost, isPending: isCommenting} = useMutation({
-    mutationFn: async() =>{
+  const { mutate: commentPost, isPending: isCommenting } = useMutation({
+    mutationFn: async () => {
       try {
-        const res = await fetch(`/api/post/comment/${post._id}`,{
-          method : "POST",
-          headers:{
-            "Content-Type":"application/json",
+        const res = await fetch(`/api/post/comment/${post._id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({text: comment}),
-        })
+          body: JSON.stringify({ text: comment }),
+        });
         const data = await res.json();
 
-        if(!res.ok){
+        if (!res.ok) {
           throw new Error(data.error || "Somthing want wrong");
         }
         return data;
       } catch (error) {
-        throw new Error(error.message || "Failed to comment post", {cause: error});
+        throw new Error(error.message || "Failed to comment post", {
+          cause: error,
+        });
       }
     },
-    onSuccess : ()=>{
+    onSuccess: () => {
       toast.success("Comment added successfully");
       setComment("");
-      queryClient.invalidateQueries({queryKey: ["posts"]});
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
-    onError: (error) =>{
+    onError: (error) => {
       toast.error(error.message);
-    }
-  }) 
-
-
-  
-
- 
+    },
+  });
 
   const handleDeletePost = () => {
     deletePost();
@@ -194,7 +201,7 @@ const Post = ({ post, authUser }) => {
                     .showModal()
                 }
               >
-                <FaRegComment className="w-4 h-4  text-slate-500 group-hover:text-sky-400" />
+                <FaRegComment className="w-4 h-4 text-slate-500 group-hover:text-sky-400" />
                 <span className="text-sm text-slate-500 group-hover:text-sky-400">
                   {post.comments.length}
                 </span>
@@ -262,7 +269,7 @@ const Post = ({ post, authUser }) => {
                 </form>
               </dialog>
               <div className="flex gap-1 items-center group cursor-pointer">
-                <BiRepost className="w-6 h-6  text-slate-500 group-hover:text-green-500" />
+                <BiRepost className="w-6 h-6 text-slate-500 group-hover:text-green-500" />
                 <span className="text-sm text-slate-500 group-hover:text-green-500">
                   0
                 </span>
@@ -299,13 +306,13 @@ const Post = ({ post, authUser }) => {
 };
 
 // const Posts = () => {
-// 	return (
-// 		<div>
-// 			{POSTS.map((post) => (
-// 				<Post key={post._id} post={post} />
-// 			))}
-// 		</div>
-// 	);
+// return (
+// <div>
+// {POSTS.map((post) => (
+// <Post key={post._id} post={post} />
+// ))}
+// </div>
+// );
 // };
 
 export default Post;
