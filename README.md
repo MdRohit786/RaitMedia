@@ -8,6 +8,20 @@ RaitMedia provides a focused social experience where users can create profiles, 
 
 The application follows a modular frontend/backend architecture designed to keep business logic maintainable and scalable.
 
+## DEMO OF THIS APPLICATION
+
+### Home Feed
+
+![image alt](https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/homePage.png)
+
+### Notifications
+
+![image alt](https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/notificationPage.png)
+
+### User Profile
+
+![image alt](https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/userProfile.png)
+
 ## Features
 
 * User registration and login with JWT-based authentication
@@ -222,19 +236,6 @@ The application includes loading states, skeleton components, toast notification
 
 The separation of routes, controllers, models, middleware, hooks, and reusable components makes the codebase easier to extend and maintain.
 
-## Screenshots
-
-### Home Feed
-
-https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/homePage.png
-
-### Notifications
-
-https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/notificationPage.png
-
-### User Profile
-
-https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/userProfile.png
 
 ## Project Status
 
