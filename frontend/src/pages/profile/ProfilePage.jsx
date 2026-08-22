@@ -6,7 +6,7 @@ import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkele
 import EditProfileModal from "./EditProfileModal";
 import { formatMemberSinceDate } from "../../utils/date/index";
 import { POSTS } from "../../utils/db/dummy";
-
+import {toast} from "react-hot-toast";
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
@@ -14,6 +14,7 @@ import { MdEdit } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import useFollow from "../../hooks/useFollow";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const ProfilePage = ({ authUser }) => {
   const [coverImg, setCoverImg] = useState(null);
@@ -24,7 +25,9 @@ const ProfilePage = ({ authUser }) => {
   const profileImgRef = useRef(null);
   const { username } = useParams();
 
-  const{follow, isPending} = useFollow()
+  const{follow, isPending} = useFollow();
+  const queryClient = useQueryClient();
+
   const {
     data: user,
     isLoading,
@@ -47,6 +50,41 @@ const ProfilePage = ({ authUser }) => {
     },
   });
 
+  // profile image and cover image update mutation--------------
+  const {mutate:updateProfile, isPending: isUpdating} = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/users/update`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            coverImg,
+            profileImg,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to update profile");
+        }
+        return data;
+      } catch (error) {
+        throw new Error(error.message || "Failed to update profile", { cause: error });
+      }
+    },
+    onSuccess: async () => {
+      toast.success("Profile updated successfully");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+        queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+      ])
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update profile");
+    },
+  });
+// ---------------------------------------------------------------------------------------
   const isMyProfile = authUser?._id === user?._id;
   const memberSinceDate = formatMemberSinceDate(user?.createdAt);
 
@@ -154,9 +192,9 @@ const ProfilePage = ({ authUser }) => {
                 {(coverImg || profileImg) && (
                   <button
                     className="btn btn-outline rounded-full btn-sm w-24 bg-gray-500 text-white hover:bg-primary hover:border-primary transition duration-300"
-                    onClick={() => alert("Profile updated successfully")}
+                    onClick={() => updateProfile()}
                   >
-                    Update
+                    {isUpdating ? "Updating..." : "Update"}
                   </button>
                 )}
               </div>
