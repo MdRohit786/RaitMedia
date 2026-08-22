@@ -13,6 +13,8 @@ import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import useFollow from "../../hooks/useFollow";
+
 const ProfilePage = ({ authUser }) => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
@@ -22,6 +24,7 @@ const ProfilePage = ({ authUser }) => {
   const profileImgRef = useRef(null);
   const { username } = useParams();
 
+  const{follow, isPending} = useFollow()
   const {
     data: user,
     isLoading,
@@ -46,6 +49,8 @@ const ProfilePage = ({ authUser }) => {
 
   const isMyProfile = authUser?._id === user?._id;
   const memberSinceDate = formatMemberSinceDate(user?.createdAt);
+
+  const amIFollowing = authUser?.following?.includes(user?._id);
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
@@ -139,9 +144,11 @@ const ProfilePage = ({ authUser }) => {
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm w-24 bg-gray-500 text-white hover:bg-primary hover:border-primary transition duration-300"
-                    onClick={() => alert("Followed successfully")}
+                    onClick={() => follow(user?._id)}
                   >
-                    Follow
+                    {isPending && "Loading..."}
+                    {!isPending && amIFollowing && "Unfollow"}
+                    {!isPending && !amIFollowing && "Follow"}
                   </button>
                 )}
                 {(coverImg || profileImg) && (

@@ -18,18 +18,18 @@ const useFollow = () => {
         }
         return data;
        } catch (error) {
-        throw new Error(error.message),{cause:error};
+        throw new Error(error.message || "Failed to follow user", { cause: error });
 
        }
     },
-    onSuccess:() =>{
-        Promise.all([
-
+    onSuccess: async (data) => {
+        await Promise.all([
           queryClient.invalidateQueries({queryKey:['suggestedUsers']}),
-          queryClient.invalidateQueries({queryKey:['authUser']})
-        ])
+          queryClient.invalidateQueries({queryKey:['authUser']}),
+          queryClient.invalidateQueries({queryKey:['userProfile']})
+        ]);
 
-        toast.success("followed");
+        toast.success(data?.message || "Follow status updated");
     },
     onError:(error) =>{
       toast.error(error.message)
