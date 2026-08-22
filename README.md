@@ -226,15 +226,15 @@ The separation of routes, controllers, models, middleware, hooks, and reusable c
 
 ### Home Feed
 
-![Home Feed](./screenshots/home.png)
+https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/homePage.png
 
 ### Notifications
 
-![Notifications](./screenshots/notifications.png)
+https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/notificationPage.png
 
 ### User Profile
 
-![User Profile](./screenshots/profile.png)
+https://github.com/MdRohit786/RaitMedia/blob/ba546b36e07271d8d71faa1950fffa12e58a5816/images/userProfile.png
 
 ## Project Status
 
