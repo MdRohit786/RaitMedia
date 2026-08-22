@@ -1,8 +1,14 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 
-const EditProfileModal = () => {
+
+const EditProfileModal = ({ authUser }) => {
+
+	const queryClient = useQueryClient();
+
 	const [formData, setFormData] = useState({
-		fullName: "",
+		fullname: "",
 		username: "",
 		email: "",
 		bio: "",
@@ -11,15 +17,62 @@ const EditProfileModal = () => {
 		currentPassword: "",
 	});
 
+
+	 const {mutate:updateProfile, isPending: isUpdating} = useMutation({
+		mutationFn: async () => {
+		  try {
+			const res = await fetch(`/api/users/update`, {
+			  method: "POST",
+			  headers: {
+				"Content-Type": "application/json",
+			  },
+			  body: JSON.stringify(formData),
+			});
+			const data = await res.json();
+			if (!res.ok) {
+			  throw new Error(data.message || "Failed to update profile");
+			}
+			return data;
+		  } catch (error) {
+			throw new Error(error.message || "Failed to update profile", { cause: error });
+		  }
+		},
+		onSuccess: async () => {
+		  toast.success("Profile updated successfully");
+		  await Promise.all([
+			queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+			queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
+		  ])
+		},
+		onError: (error) => {
+		  toast.error(error.message || "Failed to update profile");
+		},
+	  });
+
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
+	};
+
+	const handleOpenModal = () => {
+		if (authUser) {
+			setFormData({
+				fullname: authUser.fullname || "",
+				username: authUser.username || "",
+				email: authUser.email || "",
+				bio: authUser.bio || "",
+				link: authUser.link || "",
+				newPassword: "",
+				currentPassword: "",
+			});
+		}
+		document.getElementById("edit_profile_modal").showModal();
 	};
 
 	return (
 		<>
 			<button
 				className='btn btn-outline rounded-full btn-sm w-32 bg-gray-500 text-white hover:bg-primary hover:border-primary transition duration-300'
-				onClick={() => document.getElementById("edit_profile_modal").showModal()}
+				onClick={handleOpenModal}
 			>
 				Edit profile
 			</button>
@@ -30,7 +83,7 @@ const EditProfileModal = () => {
 						className='flex flex-col gap-4'
 						onSubmit={(e) => {
 							e.preventDefault();
-							alert("Profile updated successfully");
+							updateProfile();
 						}}
 					>
 						<div className='flex flex-wrap gap-2'>
@@ -38,8 +91,8 @@ const EditProfileModal = () => {
 								type='text'
 								placeholder='Full Name'
 								className='flex-1 input border border-gray-700 bg-gray-800 text-white placeholder:text-slate-500 rounded p-2 input-md'
-								value={formData.fullName}
-								name='fullName'
+								value={formData.fullname}
+								name='fullname'
 								onChange={handleInputChange}
 							/>
 							<input
@@ -80,7 +133,7 @@ const EditProfileModal = () => {
 							<input
 								type='password'
 								placeholder='New Password'
-								className='fflex-1 input border border-gray-700 bg-gray-800 text-white placeholder:text-slate-500 rounded p-2 input-md'
+								className='flex-1 input border border-gray-700 bg-gray-800 text-white placeholder:text-slate-500 rounded p-2 input-md'
 								value={formData.newPassword}
 								name='newPassword'
 								onChange={handleInputChange}
@@ -94,7 +147,7 @@ const EditProfileModal = () => {
 							name='link'
 							onChange={handleInputChange}
 						/>
-						<button className='btn btn-primary rounded-full btn-sm bg-blue-600 text-white'>Update</button>
+						<button className='btn btn-primary rounded-full btn-sm bg-blue-600 text-white'>{isUpdating ? "Updating..." : "Update"}</button>
 					</form>
 				</div>
 				<form method='dialog' className='modal-backdrop'>

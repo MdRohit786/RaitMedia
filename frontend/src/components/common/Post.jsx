@@ -159,7 +159,7 @@ const Post = ({ post, authUser, feedType }) => {
               to={`/profile/${postOwner.username}`}
               className="font-bold text-white"
             >
-              {postOwner.fullName}
+              {postOwner.fullname}
             </Link>
             <span className="text-gray-400 flex gap-1 text-sm">
               <Link to={`/profile/${postOwner.username}`}>
@@ -236,7 +236,7 @@ const Post = ({ post, authUser, feedType }) => {
                         <div className="flex flex-col">
                           <div className="flex items-center gap-1">
                             <span className="font-bold text-white">
-                              {comment.user.fullName}
+                              {comment.user.fullname}
                             </span>
                             <span className="text-gray-400 text-sm">
                               @{comment.user.username}
