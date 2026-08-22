@@ -1,71 +1,37 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
-
+import useUpdateUser from "../../hooks/useUpdateUser";
 
 const EditProfileModal = ({ authUser }) => {
-
-	const queryClient = useQueryClient();
-
-	const [formData, setFormData] = useState({
-		fullname: "",
-		username: "",
-		email: "",
-		bio: "",
-		link: "",
+	const [formData, setFormData] = useState(() => ({
+		fullname: authUser?.fullname ?? "",
+		username: authUser?.username ?? "",
+		email: authUser?.email ?? "",
+		bio: authUser?.bio ?? "",
+		link: authUser?.link ?? "",
 		newPassword: "",
 		currentPassword: "",
-	});
+	}));
 
-
-	 const {mutate:updateProfile, isPending: isUpdating} = useMutation({
-		mutationFn: async () => {
-		  try {
-			const res = await fetch(`/api/users/update`, {
-			  method: "POST",
-			  headers: {
-				"Content-Type": "application/json",
-			  },
-			  body: JSON.stringify(formData),
-			});
-			const data = await res.json();
-			if (!res.ok) {
-			  throw new Error(data.message || "Failed to update profile");
-			}
-			return data;
-		  } catch (error) {
-			throw new Error(error.message || "Failed to update profile", { cause: error });
-		  }
-		},
-		onSuccess: async () => {
-		  toast.success("Profile updated successfully");
-		  await Promise.all([
-			queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-			queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
-		  ])
-		},
-		onError: (error) => {
-		  toast.error(error.message || "Failed to update profile");
-		},
-	  });
+	const { updateProfile, isUpdating } = useUpdateUser();
 
 	const handleInputChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
+		setFormData((currentFormData) => ({
+			...currentFormData,
+			[e.target.name]: e.target.value,
+		}));
 	};
 
 	const handleOpenModal = () => {
-		if (authUser) {
-			setFormData({
-				fullname: authUser.fullname || "",
-				username: authUser.username || "",
-				email: authUser.email || "",
-				bio: authUser.bio || "",
-				link: authUser.link || "",
-				newPassword: "",
-				currentPassword: "",
-			});
-		}
-		document.getElementById("edit_profile_modal").showModal();
+		setFormData({
+			fullname: authUser?.fullname ?? "",
+			username: authUser?.username ?? "",
+			email: authUser?.email ?? "",
+			bio: authUser?.bio ?? "",
+			link: authUser?.link ?? "",
+			newPassword: "",
+			currentPassword: "",
+		});
+		document.getElementById("edit_profile_modal")?.showModal();
 	};
 
 	return (
@@ -83,7 +49,7 @@ const EditProfileModal = ({ authUser }) => {
 						className='flex flex-col gap-4'
 						onSubmit={(e) => {
 							e.preventDefault();
-							updateProfile();
+							updateProfile(formData);
 						}}
 					>
 						<div className='flex flex-wrap gap-2'>
